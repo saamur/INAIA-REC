@@ -27,7 +27,7 @@ conda activate INAIA-REC
 
 ## Running an Example Experiment
 
-To reproduce the reference scenario presented in the paper (three active nodes and one passive node), you can run the following script from the project root:
+To reproduce the reference scenario presented in the paper (three active nodes and one passive node) with the REC agent trained with INAIA, you can run the following script from the project root:
 
 ```bash
 python experiments/3_active_1_passive/inaia.py
