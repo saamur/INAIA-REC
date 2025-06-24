@@ -192,7 +192,6 @@ def parameter_generator(battery_options: dict,
                 demands = [demand[profiles] for profiles in demand_profiles]
                 demand_paths = [value] * num
             elif isinstance(value, list):
-                print('yaaaas')
                 demand_profiles = []
                 demands = []
                 demand_paths = []
@@ -227,7 +226,6 @@ def parameter_generator(battery_options: dict,
                 generations = [generation_data] * num
                 generation_paths = [value] * num
             elif isinstance(value, list):
-                print('yaaaas2')
                 generations = []
                 generation_paths = []
                 for path in value:

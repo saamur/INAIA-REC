@@ -186,8 +186,6 @@ class RECEnv(MultiAgentEnv):
         assert self.clip_action_coeff.shape == () or self.clip_action_coeff.shape == (self.num_battery_agents,)
         assert self.glob_coeff.shape == () or self.glob_coeff.shape == (self.num_battery_agents,)
 
-        print('norm? ' + str(self.use_reward_normalization))
-
         self.smoothing_factor_rec_actions = settings['smoothing_factor_rec_actions']
 
         ########################## OBSERVATION SPACES ##########################
@@ -307,9 +305,6 @@ class RECEnv(MultiAgentEnv):
                                                                                 shape=(1,))
                                                                  for key in self.obs_battery_agents_keys}))
                                                for a in self.battery_agents])
-
-        print(self.obs_battery_agents_keys)
-
 
         self.obs_rec_keys = ['demands_base_battery_houses', 'demands_battery_battery_houses', 'generations_battery_houses']
 

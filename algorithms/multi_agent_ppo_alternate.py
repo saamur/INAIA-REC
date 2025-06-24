@@ -25,7 +25,7 @@ import algorithms.utils as utils
 
 def make_train(config:Dict, env:RECEnv, network_batteries=None, network_rec=None, seed=123):
 
-    print('PPO FICTITIOUS')
+    print('PPO ALTERNATE')
 
     assert not config.get('USE_REC_RULE_BASED_POLICY', False), 'Use multi_agent_ppo when using a rule-based REC policy'
 

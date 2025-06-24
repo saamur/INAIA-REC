@@ -137,7 +137,6 @@ def update_rec_network_lola(runner_state:RunnerState, env, config):
             # RERUN NETWORK
             pi, value = network(traj_batch_obs)
             log_prob = pi.log_prob(traj_batch_actions + 1e-8)
-            # print(log_prob.shape)
 
             if config['NORMALIZE_TARGETS_REC']:
                 targets = (targets - targets.mean()) / (targets.std() + 1e-8)
@@ -154,9 +153,6 @@ def update_rec_network_lola(runner_state:RunnerState, env, config):
 
             # CALCULATE ACTOR LOSS
             ratio = jnp.exp(log_prob - traj_batch_log_probs)
-
-            # jax.debug.print('rec ratio mean {x}, max {y}, min {z}, std {w}', x=ratio.mean(), y=ratio.max(),
-            #                 z=ratio.min(), w=ratio.std(), ordered=True)
 
             if config['NORMALIZE_ADVANTAGES_REC']:
                 gae = (gae - gae.mean()) / (gae.std() + 1e-8)
@@ -186,7 +182,7 @@ def update_rec_network_lola(runner_state:RunnerState, env, config):
         loss = ppo_loss_lola(runner_state, traj_batch, advantages_rec, targets_rec)
         runner_state.network_rec.eval()
 
-        jax.debug.print('rec loss: {x}', x=loss, ordered=True)
+        # jax.debug.print('rec loss: {x}', x=loss, ordered=True)
 
         return loss, runner_state
 
@@ -199,7 +195,7 @@ def update_rec_network_lola(runner_state:RunnerState, env, config):
 
     grads, runner_state = grad_fn(network_rec, runner_state)
 
-    jax.debug.print('grads rec: {n}', n=optax.global_norm(grads), ordered=True)
+    # jax.debug.print('grads rec: {n}', n=optax.global_norm(grads), ordered=True)
 
     runner_state = runner_state._replace(optimizer_rec=opt_rec)
 
@@ -266,7 +262,6 @@ def update_rec_network_inaia(runner_state:RunnerState, env, config):
     if config.get('CHANGE_OPTIMIZER_BATTERIES_FOR_REC_UPDATE', True):
         tx = optax.chain(optax.clip_by_global_norm(config['MAX_GRAD_NORM']),
                          optax.sgd(learning_rate=config['LR_BATTERIES_FOR_REC_UPDATE']))
-        # tx = optax.apply_if_finite(tx, 10)
         battery_optimizer_for_rec_update = StackedOptimizer(config['NUM_BATTERY_AGENTS'],
                                                             battery_network_for_rec_update,
                                                             tx)
@@ -287,7 +282,7 @@ def update_rec_network_inaia(runner_state:RunnerState, env, config):
     runner_state = runner_state._replace(network_rec=runner_state_for_rec_update.network_rec,
                                          optimizer_rec=runner_state_for_rec_update.optimizer_rec)
 
-    jax.debug.print('rec mean loss: {l}, rec mean grad norms: {n}', l=losses.mean(), n=grad_norms.mean(), ordered=True)
+    # jax.debug.print('rec mean loss: {l}, rec mean grad norms: {n}', l=losses.mean(), n=grad_norms.mean(), ordered=True)
 
     return runner_state, losses
 
@@ -322,14 +317,7 @@ def ppo_loss_fn(network, traj_batch, gae, targets, iteration, epoch, config):
         gae = (gae - gae.mean()) / (gae.std() + 1e-8)
 
     loss_actor1 = ratio * gae
-    loss_actor2 = (
-            jnp.clip(
-                ratio,
-                1.0 - config['CLIP_EPS'],
-                1.0 + config['CLIP_EPS'],
-            )
-            * gae
-    )
+    loss_actor2 = jnp.clip(ratio, 1.0 - config['CLIP_EPS'], 1.0 + config['CLIP_EPS']) * gae
     loss_actor = -jnp.minimum(loss_actor1, loss_actor2)
     loss_actor = loss_actor.mean()
     entropy = pi.entropy().mean()

@@ -25,7 +25,10 @@ import algorithms.utils as utils
 
 def make_train(config: Dict, env:RECEnv, network_batteries=None, network_rec=None, seed=123):
 
-    print('PPO NORMALE')
+    if config.get('USE_REC_RULE_BASED_POLICY', False):
+        print('RULE-BASED')
+    else:
+        print('PPO')
 
     config_enhancer(config, env, is_rec_ppo=not config['USE_REC_RULE_BASED_POLICY'])
 
@@ -73,7 +76,6 @@ def make_train(config: Dict, env:RECEnv, network_batteries=None, network_rec=Non
 
     return env, network_batteries, optimizer_batteries, network_rec, optimizer_rec
 
-# @partial(nnx.jit, static_argnums=(0, 1, 7, 8, 9, 11))
 def train(env: RECEnv, config, world_metadata, network_batteries, optimizer_batteries, network_rec, optimizer_rec, rng, validate=True, freq_val=None, val_env=None,
               val_rng=None, val_num_iters=None, path_saving=None):
 

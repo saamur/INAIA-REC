@@ -40,15 +40,11 @@ class ActorCritic(nnx.Module):
         else:
             self.obs_keys_cri = obs_keys_cri
 
-
-        print('ActorCritic', self.obs_keys_act, self.obs_keys_cri)
-
         act_net_arch = list(act_net_arch)
         cri_net_arch = list(cri_net_arch)
 
         self.normalize = normalize
         if normalize:
-            print('norm batt')
             self.norm_layer_act = RunningNorm(num_features=len(self.obs_keys_act), use_bias=False, use_scale=False, rngs=rngs)
             self.norm_layer_cri = RunningNorm(num_features=len(self.obs_keys_cri), use_bias=False, use_scale=False, rngs=rngs)
 
@@ -97,14 +93,11 @@ class ActorCritic(nnx.Module):
     def _prepare_data(self, obs, return_cri=True):
         data_act = jnp.stack([obs[key] for key in self.obs_keys_act], axis=-1)
 
-        print('act', data_act.shape)
-
         if self.normalize:
             data_act = self.norm_layer_act(data_act)
 
         if return_cri:
             data_cri = jnp.stack([obs[key] for key in self.obs_keys_cri], axis=-1)
-            print('cri', data_cri.shape)
             if self.normalize:
                 data_cri = self.norm_layer_cri(data_cri)
         else:
@@ -497,8 +490,6 @@ class RECActorCritic(nnx.Module):
         else:
             self.obs_keys_cri = obs_keys_cri
 
-        print('RECActorCritic', self.obs_keys_act, self.obs_keys_cri)
-
         self.obs_is_local = obs_is_local
         self.num_battery_agents = num_battery_agents
 
@@ -509,7 +500,6 @@ class RECActorCritic(nnx.Module):
 
         self.normalize = normalize
         if self.normalize:
-            print('norm rec')
             self.norm_layer_act = RunningNorm(num_features=in_features_act, use_bias=False, use_scale=False, rngs=rngs)
             self.norm_layer_cri = RunningNorm(num_features=in_features_cri, use_bias=False, use_scale=False, rngs=rngs)
 
@@ -534,12 +524,6 @@ class RECActorCritic(nnx.Module):
     def __call__(self, obs, return_cri=True):
         data_act, data_cri = self.prepare_data(obs, return_cri=return_cri)
 
-        print('dataaa act', data_act.shape)
-        if return_cri:
-            print('dataaa cri', data_cri.shape)
-
-        # jax.debug.print('Shape Data: {x}', x=data.shape)
-
         logit = data_act
 
         logit = self.call_non_shared_layers(self.act_layers_before, logit)
@@ -549,7 +533,6 @@ class RECActorCritic(nnx.Module):
 
         logit = self.call_non_shared_layers(self.act_layers_after, logit)
         logit = logit.squeeze(axis=-1)
-        print('logit', logit.shape)
 
         alpha = nnx.softplus(logit) + 1e-3
 
@@ -921,8 +904,6 @@ class RECMLP(nnx.Module):
 
         self.obs_keys = obs_keys
 
-        print('RECMLP', self.obs_keys)
-
         self.obs_is_local = obs_is_local
         self.num_battery_agents = num_battery_agents
 
@@ -932,7 +913,6 @@ class RECMLP(nnx.Module):
 
         self.normalize = normalize
         if self.normalize:
-            print('norm rec')
             self.norm_layer = RunningNorm(num_features=in_features, use_bias=False, use_scale=False, rngs=rngs)
 
         self.passive_houses = passive_houses
@@ -950,8 +930,6 @@ class RECMLP(nnx.Module):
     def __call__(self, obs):
         data = self.prepare_data(obs)
 
-        print('dataaa mlp', data.shape)
-
         logit = data
 
         logit = self.call_non_shared_layers(self.layers_before, logit)
@@ -961,7 +939,6 @@ class RECMLP(nnx.Module):
 
         logit = self.call_non_shared_layers(self.layers_after, logit)
         logit = logit.squeeze(axis=-1)
-        print('logit', logit.shape)
 
         vec = nnx.softmax(logit)
 
