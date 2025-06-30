@@ -3,7 +3,7 @@ import sys
 import time
 
 sys.path.append(os.getcwd())
-os.environ['XLA_PYTHON_CLIENT_MEM_FRACTION'] = '.5'
+os.environ['XLA_PYTHON_CLIENT_MEM_FRACTION'] = '1.'
 
 import jax
 jax.config.update('jax_default_matmul_precision', 'float32')
